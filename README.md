@@ -19,6 +19,7 @@ You won't be banned or anything, I downloaded all Kaguya-Sama seasons to test du
 - Parallel segment downloads (10 workers) for faster downloads
 - Retry with backoff on connection errors
 - Batch download from a list of URLs
+- Select specific episodes from a season or series with `--episodes` (e.g. `--episodes 1-12,15`)
 
 ## Requirements
 
@@ -46,6 +47,8 @@ Usage of ./crunchyroll-downloader:
         Log raw episode playback JSON and manifest XML
   -download-delay duration
         Minimum delay between episode downloads, to help avoid Crunchyroll's rate limiting (e.g. "30s", "2m")
+  -episodes string
+        Episode number(s) to download from a season/series, comma-separated and/or ranges (e.g. "1-12,15"). Numbers are per season and only apply to series URLs
   -etp-rt string
         The "etp_rt" cookie value of your account
   -file string
@@ -69,6 +72,13 @@ To download a specific episode:
 ```shell
 ./crunchyroll-downloader --url https://www.crunchyroll.com/watch/GE00198973JAJP/dawn-and-confusion --etp-rt replace_this
 ```
+
+To download only episodes 1-12 and 15 of a season:
+```shell
+./crunchyroll-downloader --url https://www.crunchyroll.com/series/GJ0H7Q5ZJ/hells-paradise --season 1 --episodes 1-12,15 --etp-rt replace_this
+```
+
+Without `--season`, the selection applies to each season of the series. Episode numbers are per season, and `0` can be used for specials.
 
 To batch download from a file (one URL per line):
 ```shell
