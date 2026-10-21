@@ -106,10 +106,11 @@ func processUrl(url string, episodeRanges []episodeRange) {
 				return
 			}
 
-			episodes := filterEpisodes(getSeasonEpisodes(seasonId, primaryAudio, primarySubs), episodeRanges)
+			seasonEpisodes := getSeasonEpisodes(seasonId, primaryAudio, primarySubs)
+			episodes := filterEpisodes(seasonEpisodes, episodeRanges)
 			if len(episodes) == 0 {
-				if len(episodeRanges) > 0 {
-					fmt.Printf("No episodes matched -episodes in season %v.\n", *seasonNumber)
+				if len(episodeRanges) > 0 && len(seasonEpisodes) > 0 {
+					fmt.Printf("No episodes matched -episodes in season %v (available: %s).\n", *seasonNumber, formatEpisodeNumbers(seasonEpisodes))
 				} else {
 					fmt.Printf("Season %v has no downloadable episodes.\n", *seasonNumber)
 				}
@@ -120,10 +121,11 @@ func processUrl(url string, episodeRanges []episodeRange) {
 			print("No season number specified, downloading all seasons...\n")
 
 			for _, season := range seasons {
-				episodes := filterEpisodes(getSeasonEpisodes(season.ID, primaryAudio, primarySubs), episodeRanges)
+				seasonEpisodes := getSeasonEpisodes(season.ID, primaryAudio, primarySubs)
+				episodes := filterEpisodes(seasonEpisodes, episodeRanges)
 				if len(episodes) == 0 {
-					if len(episodeRanges) > 0 {
-						fmt.Printf("No episodes matched -episodes in season %v, skipping.\n", season.SeasonNumber)
+					if len(episodeRanges) > 0 && len(seasonEpisodes) > 0 {
+						fmt.Printf("No episodes matched -episodes in season %v, skipping (available: %s).\n", season.SeasonNumber, formatEpisodeNumbers(seasonEpisodes))
 					} else {
 						fmt.Printf("Season %v has no downloadable episodes, skipping.\n", season.SeasonNumber)
 					}
@@ -138,7 +140,7 @@ func processUrl(url string, episodeRanges []episodeRange) {
 func main() {
 	url := flag.String("url", "", "URL of the episode/season to download")
 	urlsFile := flag.String("file", "", "Path to a text file with one URL per line")
-	episodesSpec := flag.String("episodes", "", "Episode number(s) to download from a season/series, comma-separated and/or ranges (e.g. \"1-12,15\"). Numbers are per season and only apply to series URLs")
+	episodesSpec := flag.String("episodes", "", "Episode number(s) as shown on Crunchyroll, comma-separated and/or ranges (e.g. \"1-12,15\"); numbering may continue across seasons. Only applies to series URLs")
 	flag.Parse()
 
 	if *url == "" && *urlsFile == "" {

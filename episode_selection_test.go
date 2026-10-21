@@ -44,6 +44,34 @@ func TestParseEpisodeSelection(t *testing.T) {
 	}
 }
 
+func TestFormatEpisodeNumbers(t *testing.T) {
+	tests := []struct {
+		name    string
+		numbers []int
+		want    string
+	}{
+		{name: "empty", numbers: nil, want: ""},
+		{name: "single", numbers: []int{5}, want: "5"},
+		{name: "consecutive", numbers: []int{1, 2, 3}, want: "1-3"},
+		{name: "specials", numbers: []int{0, 1, 2}, want: "0-2"},
+		{name: "gaps", numbers: []int{1, 2, 3, 5, 7, 8}, want: "1-3,5,7-8"},
+		{name: "unordered", numbers: []int{8, 1, 3, 2}, want: "1-3,8"},
+		{name: "duplicates", numbers: []int{2, 1, 2, 3, 3}, want: "1-3"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			episodes := make([]SeasonEpisode, len(tc.numbers))
+			for i, number := range tc.numbers {
+				episodes[i] = SeasonEpisode{EpisodeNumber: number}
+			}
+			if got := formatEpisodeNumbers(episodes); got != tc.want {
+				t.Fatalf("formatEpisodeNumbers(%v) = %q, want %q", tc.numbers, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestFilterEpisodes(t *testing.T) {
 	episodes := []SeasonEpisode{
 		{EpisodeNumber: 0, Title: "special"},

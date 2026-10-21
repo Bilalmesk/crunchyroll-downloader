@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -62,6 +63,33 @@ func parseEpisodeNumber(text string) (int, error) {
 // contains reports whether n falls inside the range.
 func (r episodeRange) contains(n int) bool {
 	return n >= r.first && n <= r.last
+}
+
+// formatEpisodeNumbers compresses the episode numbers in episodes into a
+// comma-separated list of ranges, e.g. "1-3,5,7-8". It is used to show which
+// numbers a season actually has when a selection matches nothing.
+func formatEpisodeNumbers(episodes []SeasonEpisode) string {
+	numbers := make([]int, 0, len(episodes))
+	for _, episode := range episodes {
+		numbers = append(numbers, episode.EpisodeNumber)
+	}
+	slices.Sort(numbers)
+	numbers = slices.Compact(numbers)
+
+	var parts []string
+	for i := 0; i < len(numbers); {
+		j := i
+		for j+1 < len(numbers) && numbers[j+1] == numbers[j]+1 {
+			j++
+		}
+		if i == j {
+			parts = append(parts, strconv.Itoa(numbers[i]))
+		} else {
+			parts = append(parts, fmt.Sprintf("%d-%d", numbers[i], numbers[j]))
+		}
+		i = j + 1
+	}
+	return strings.Join(parts, ",")
 }
 
 // filterEpisodes returns the episodes whose numbers match any selected range,
